@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APTEKA AI Chat</title>
+    <link rel="stylesheet" href="./styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e0e7ff 0%, #f0fdfa 100%);
+            font-family: 'Inter', 'Segoe UI', Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-container {
+            width: 100%;
+            max-width: 420px;
+            height: 80vh;
+            background: #fff;
+            border-radius: 32px;
+            box-shadow: 0 8px 32px rgba(60, 72, 88, 0.18);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+        .chat-header {
+            background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+            color: #fff;
+            padding: 28px 32px 20px 32px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border-bottom-left-radius: 24px;
+            border-bottom-right-radius: 24px;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.08);
+        }
+        .chat-header .fa-robot {
+            font-size: 2.2rem;
+            background: #fff3;
+            border-radius: 50%;
+            padding: 12px;
+        }
+        .chat-header .ai-status {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .chat-header .ai-status .fa-circle {
+            color: #22c55e;
+            font-size: 0.7rem;
+        }
+        .chat-messages {
+            flex: 1;
+            padding: 28px 20px 16px 20px;
+            overflow-y: auto;
+            background: linear-gradient(120deg, #f8fafc 60%, #e0e7ff 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+        .message {
+            display: flex;
+            align-items: flex-end;
+            gap: 10px;
+            animation: fadeIn 0.5s;
+        }
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        .message .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #e0e7ff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: #6366f1;
+        }
+        .message.user .avatar {
+            background: #dbeafe;
+            color: #0ea5e9;
+        }
+        .message .bubble {
+            max-width: 70%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            font-size: 1rem;
+            line-height: 1.5;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.05);
+        }
+        .message.ai .bubble {
+            background: #f1f5f9;
+            color: #334155;
+            border-bottom-left-radius: 4px;
+        }
+        .message.user .bubble {
+            background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+        .chat-input-area {
+            padding: 18px 20px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .chat-input-area input {
+            flex: 1;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: none;
+            background: #e0e7ff;
+            font-size: 1rem;
+            outline: none;
+            transition: background 0.2s;
+        }
+        .chat-input-area input:focus {
+            background: #fff;
+            box-shadow: 0 0 0 2px #6366f1;
+        }
+        .chat-input-area button {
+            background: linear-gradient(90deg, #6366f1 0%, #06b6d4 100%);
+            border: none;
+            color: #fff;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            cursor: pointer;
+            transition: box-shadow 0.2s;
+            box-shadow: 0 2px 8px rgba(99,102,241,0.10);
+        }
+        .chat-input-area button:active {
+            box-shadow: 0 1px 4px rgba(99,102,241,0.18);
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+        /* Scrollbar styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+            background: #e0e7ff;
+            border-radius: 8px;
+        }
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: #c7d2fe;
+            border-radius: 8px;
+        }
+        @media (max-width: 600px) {
+            .chat-container {
+                max-width: 100vw;
+                height: 100vh;
+                border-radius: 0;
+            }
+            .chat-header {
+                padding: 18px 12px 14px 12px;
+            }
+            .chat-input-area {
+                padding: 12px 8px;
+            }
+        }
+        #backHomeBtn {
+    margin-left: auto;
+    padding: 10px 26px 10px 18px;
+    border-radius: 16px 0 16px 16px;
+    border: none;
+    background: linear-gradient(100deg, #06b6d4 0%, #6366f1 100%);
+    color: #fff;
+    font-weight: 600;
+    font-size: 1.08rem;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(99,102,241,0.13);
+    transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-direction: row;
+}
+#backHomeBtn i {
+    font-size: 1.2rem;
+    margin-right: 6px;
+    margin-left: 0;
+}
+#backHomeBtn:hover, #backHomeBtn:focus {
+    background: linear-gradient(100deg, #6366f1 0%, #06b6d4 100%);
+    box-shadow: 0 4px 16px rgba(6,182,212,0.18);
+    transform: translateY(-2px) scale(1.03);
+}
+    </style>
+</head>
+<body>
+    <!-- NAVBAR (kategoriya bo'lmasin) -->
+  
+    <div class="chat-container">
+        <div class="chat-header">
+            <img src="./img/logo.jpg" alt="Logo" style="width:44px;height:44px;border-radius:50%;background:#fff3;padding:6px;">
+            <div>
+                <div style="font-weight:600;font-size:1.1rem;">APTEKA AI Chat</div>
+            </div>
+            <div class="ai-status">
+            </div>
+            <button id="backHomeBtn" style="margin-left: auto; padding: 10px 26px 10px 18px; border-radius: 16px 0 16px 16px; border: none; background: linear-gradient(100deg, #06b6d4 0%, #6366f1 100%); color: #fff; font-weight: 600; font-size: 1.08rem; cursor: pointer; display: flex; align-items: center; gap: 10px; flex-direction: row;">
+                <i class="fas fa-arrow-left" style="font-size:1.2rem;margin-right:6px;margin-left:0;"></i> Bosh sahifa
+            </button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <!-- Chat messages will appear here -->
+            <div class="message ai">
+                <div class="avatar">
+                    <img src="./img/logo.jpg" alt="Logo" style="width:32px;height:32px;border-radius:50%;">
+                </div>
+                <div class="bubble">Salom! Men APTEKA AI. Sog'lig'ingiz bo'yicha savollaringizni yozing yoki dori haqida ma'lumot so'rang.</div>
+            </div>
+        </div>
+        <form class="chat-input-area" id="chatForm" autocomplete="off">
+            <input type="text" id="chatInput" placeholder="Savolingizni yozing..." required>
+            <button type="submit"><i class="fas fa-paper-plane"></i></button>
+        </form>
+    </div>
+    <script type="module">
+        import { getAllProducts } from './js/db.js';
+
+        const translations = {
+            uz: {
+                welcome: "Salom! Men APTEKA AI. Sog'lig'ingiz bo'yicha savollaringizni yozing yoki dori haqida ma'lumot so'rang.",
+                recipe: "Retsept yozib berish uchun shifokorga murojaat qilishingiz kerak.",
+                notFound: "Siz so‘ragan mahsulot topilmadi yoki AI backend ulanmagan.",
+                oneProduct: "Siz izlagan mahsulot shu",
+                manyProducts: "Bizda bor mahsulotlar shular 👇🏻",
+                inputPlaceholder: "Savolingizni yozing..."
+            },
+            ru: {
+                welcome: "Здравствуйте! Я APTEKA AI. Задайте вопрос о здоровье или спросите о лекарствах.",
+                recipe: "Для получения рецепта обратитесь к врачу.",
+                notFound: "Запрошенный товар не найден или AI backend не подключен.",
+                oneProduct: "Вот найденный товар.",
+                manyProducts: "У нас есть следующие товары 👇🏻",
+                inputPlaceholder: "Напишите ваш вопрос..."
+            },
+            en: {
+                welcome: "Hello! I am APTEKA AI. Ask your health question or request info about a medicine.",
+                recipe: "Please consult a doctor to get a prescription.",
+                notFound: "Requested product not found or AI backend is not connected.",
+                oneProduct: "Here is the product you searched for.",
+                manyProducts: "Available products 👇🏻",
+                inputPlaceholder: "Type your question..."
+            }
+        };
+
+        let currentLang = 'uz';
+
+        const chatForm = document.getElementById('chatForm');
+        const chatInput = document.getElementById('chatInput');
+        const chatMessages = document.getElementById('chatMessages');
+
+        chatForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const userMsg = chatInput.value.trim();
+            if (!userMsg) return;
+            appendMessage('user', userMsg);
+            chatInput.value = '';
+
+            // Faqat o'zbek tili uchun ishlaydi
+            let lang = 'uz';
+
+            // Salomlashuv uchun
+            const greetings = {
+                uz: ['salom', 'assalomu alaykum', 'salomlar']
+            };
+            const greetingReplies = [
+                "Assalomu alaykum! Savolingizni yozishingiz mumkin.",
+                "Salom! Sizga qanday yordam bera olaman?",
+                "Yaxshi kun! Dori yoki sog'liq bo'yicha savolingiz bormi?"
+            ];
+            if (greetings[lang].some(word => userMsg.toLowerCase().includes(word))) {
+                setTimeout(() => {
+                    // Tasodifiy salomlashuv javobi
+                    const reply = greetingReplies[Math.floor(Math.random() * greetingReplies.length)];
+                    appendMessage('ai', reply);
+                }, 500);
+                return;
+            }
+
+            // Retsept so‘rovi uchun tekshiruv
+            const recipeWords = {
+                uz: ['retsept', 'retsept yozib', 'retsept kerak', 'retsept yozib bering']
+            };
+            if (recipeWords[lang].some(word => userMsg.toLowerCase().includes(word))) {
+                setTimeout(() => {
+                    appendMessage('ai', translations[lang].recipe);
+                }, 700);
+                return;
+            }
+
+            // Mahsulotlarni aniqlash
+            const products = getAllProducts();
+            const query = userMsg.toLowerCase();
+
+            // Fuzzy qidiruv (Levenshtein) va maxsus so‘zlar uchun
+            function similarity(a, b) {
+                if (!a.length || !b.length) return 0;
+                let matrix = [];
+                for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+                for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+                for (let i = 1; i <= b.length; i++) {
+                    for (let j = 1; j <= a.length; j++) {
+                        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                            matrix[i][j] = matrix[i - 1][j - 1];
+                        } else {
+                            matrix[i][j] = Math.min(
+                                matrix[i - 1][j - 1] + 1,
+                                matrix[i][j - 1] + 1,
+                                matrix[i - 1][j] + 1
+                            );
+                        }
+                    }
+                }
+                const distance = matrix[b.length][a.length];
+                return 1 - distance / Math.max(a.length, b.length);
+            }
+
+            // Maxsus so‘zlar (kapsula, sirop va boshqalar)
+            const extraWords = [
+    'kapsula', 'sirop', 'tablet', 'tabletka', 'tomchi', 'sprey', 'yog\'', 'gel', 'shampun', 'krema', 'maz', 'balzam',
+    'salfetka', 'plastir', 'sharbat', 'susuq', 'susuqlik', 'suv', 'qaymoq', 'qaynatma', 'choy', 'qoshiqcha', 'ampula',
+    'in\'eksiya', 'aerozol', 'pastilka', 'draje', 'granula', 'poroshok', 'eritma', 'suspenziya', 'bo\'tqa', 'bo\'tqacha',
+    'kapsul', 'siropi', 'kapsulasi', 'siropasi'
+];
+
+            let found = products.filter(p => {
+                const name = p.name.toLowerCase();
+                // 70% va undan yuqori o‘xshashlik bo‘lsa chiqaradi
+                if (similarity(query, name) >= 0.7) return true;
+                // Foydalanuvchi yozgan so‘zlardan biri extraWords yoki mahsulot nomida bo‘lsa chiqaradi
+                return query.split(' ').some(word =>
+                    extraWords.some(extra => word.includes(extra) || extra.includes(word)) ||
+                    name.includes(word)
+                );
+            });
+
+            // Maxsus kategoriya uchun (masalan, "vitamin", "qon bosimi", "tanometr")
+            if (found.length === 0) {
+                if (query.includes('vitamin')) {
+                    found = products.filter(p => p.category && p.category.toLowerCase().includes('vitamin'));
+                }
+                if (query.includes('qon bosim') || query.includes('tanometr')) {
+                    found = products.filter(p => p.name.toLowerCase().includes('tanometr'));
+                }
+            }
+
+            // Tasodifiy yoki noto'g'ri so'zlarni aniqlash (faqat harf yoki raqamlar, uzunligi 3 dan kam yoki 70% o‘xshashlik yo‘q)
+            const isRandom = (
+                query.length < 3 ||
+                /^[a-z0-9]+$/i.test(query.replace(/\s/g, '')) && !found.length
+            );
+
+            if (found.length > 0) {
+                if (found.length === 1) {
+                    appendProductCard(found[0]);
+                    setTimeout(() => {
+                        appendMessage('ai', translations[lang].oneProduct);
+                    }, 400);
+                } else {
+                    appendMessage('ai', translations[lang].manyProducts);
+                    found.slice(0, 3).forEach(product => {
+                        appendProductCard(product);
+                    });
+                }
+            } else if (isRandom) {
+                setTimeout(() => {
+                    appendMessage('ai', "To'g'ri yozing iltimos!");
+                }, 900);
+            } else {
+                setTimeout(() => {
+                    appendMessage('ai', "Bizning do'konimizda ushbu mahsulot mavjud emas.");
+                }, 900);
+            }
+        });
+
+        function appendMessage(sender, text) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ' + sender;
+            msgDiv.innerHTML = `
+                <div class="avatar">${
+                    sender === 'ai'
+                        ? '<img src="./img/logo.jpg" alt="Logo" style="width:32px;height:32px;border-radius:50%;">'
+                        : '<i class="fas fa-user"></i>'
+                }</div>
+                <div class="bubble">${text}</div>
+            `;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function appendProductCard(product) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message ai';
+            msgDiv.innerHTML = `
+                <div class="avatar">
+                    <img src="./img/logo.jpg" alt="Logo" style="width:32px;height:32px;border-radius:50%;">
+                </div>
+                <div class="bubble" style="padding:0;">
+                    <div class="chat-product-card">
+                        ${ product.oldPrice && product.oldPrice > product.price 
+                            ? `<div class="chat-product-badge">
+                                <i class="fas fa-tag"></i> -${ ((product.oldPrice - product.price) / product.oldPrice * 100).toFixed(2) }%
+                            </div>`
+                            : ''
+                        }
+                        <div class="chat-product-thumb">
+                            <img src="${product.image}" alt="${product.name}">
+                        </div>
+                        <div class="chat-product-info">
+                            <div class="chat-product-category">${product.category}</div>
+                            <h3 class="chat-product-title">${product.name}</h3>
+                            <div class="chat-product-rating">${getStarRating(product.rating)} <span>(${product.rating})</span></div>
+                            <div class="chat-product-price">
+                                <span class="chat-new-price">${formatPrice(product.price)}</span>
+                                ${product.oldPrice ? `<span class="chat-old-price">${formatPrice(product.oldPrice)}</span>` : ''}
+                            </div>
+                            <div class="chat-product-desc">${product.description}</div>
+                        </div>
+                        <button class="chat-btn-add-to-cart">
+                            <i class="fas fa-shopping-cart"></i> Savatchaga
+                        </button>
+                    </div>
+                </div>
+            `;
+            chatMessages.appendChild(msgDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function formatPrice(price) {
+            return price.toLocaleString('uz-UZ', { 
+                style: 'currency', 
+                currency: 'UZS',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0 
+            });
+        }
+
+        function getStarRating(rating) {
+            const fullStars = Math.floor(rating);
+            const hasHalfStar = rating % 1 !== 0;
+            let stars = '';
+            for (let i = 0; i < fullStars; i++) {
+                stars += '<i class="fas fa-star" style="color:#FFC107;font-size:14px;"></i>';
+            }
+            if (hasHalfStar) {
+                stars += '<i class="fas fa-star-half-alt" style="color:#FFC107;font-size:14px;"></i>';
+            }
+            const emptyStars = 5 - Math.ceil(rating);
+            for (let i = 0; i < emptyStars; i++) {
+                stars += '<i class="far fa-star" style="color:#FFC107;font-size:14px;"></i>';
+            }
+            return stars;
+        }
+
+        document.getElementById('backHomeBtn').onclick = function(e) {
+    // Modal oynada ochilganini tekshirish
+    if (window.self !== window.top) {
+        // Modal oynani yopish uchun parent oynaga xabar yuboriladi
+        window.parent.postMessage('closeAiModal', '*');
+        e.preventDefault();
+    } else {
+        // To'g'ridan-to'g'ri bosh sahifaga o'tish
+        window.location.href = '/';
+    }
+};
+    </script>
+    <script>
+window.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('backHomeBtn');
+    if (btn) {
+        btn.onclick = function(e) {
+            // Modal oynada ochilganini tekshirish
+            if (window.self !== window.top) {
+                window.parent.postMessage('closeAiModal', '*');
+                e.preventDefault();
+            } else {
+                window.location.href = '/';
+            }
+        };
+    }
+});
+</script>
+</body>
+</html>
